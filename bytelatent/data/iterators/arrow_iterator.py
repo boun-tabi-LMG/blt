@@ -51,6 +51,7 @@ class ArrowFileIteratorState(PydanticIteratorState):
             filesystem_type=self.filesystem_type,
             file_format=self.file_format,
         )
+        print(f"ArrowFile.dataset_files: {arrow_file.dataset_files}")
         if self.row_num != 0:
             arrow_file._set_row_num(self.row_num)
         return arrow_file
