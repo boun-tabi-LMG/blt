@@ -117,7 +117,7 @@ def main(dataset, memory, data_dir, seed=42, nchunks=32, s3_profile: str | None 
         "fineweb_edu": None,
         "fineweb_edu_10bt": "sample/10BT/*",
         "dclm_baseline_1.0": "*.jsonl.zst",
-        "dclm_baseline_1.0_10prct": "global-shard_01_of_10/*.jsonl.zst",
+        "dclm_baseline_1.0_10prct": "global-shard_01_of_10/local-shard_0_of_10/shard_00000000_processed.jsonl.zst",
     }[dataset]
     suffix = ".jsonl"
     k_validation = 10000  # Number of lines to take from each chunk for validation
