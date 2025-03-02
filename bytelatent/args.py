@@ -83,6 +83,7 @@ def distribute_data_to_rank(
     dataset_chunks = find_and_sanitize_chunks(
         dataset_path, world_size, file_pattern, s3_profile=s3_profile
     )
+    print(f"dataset_chunks: {dataset_chunks}")
     n_workers_per_chunk = world_size // len(dataset_chunks)
     rank_to_arrow_iterator_params = []
     for chunk_path in dataset_chunks:
