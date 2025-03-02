@@ -197,7 +197,12 @@ class MultiprocessIterator(StatefulIterator):
                 )
 
             self.base_iterator = base_iterator_state.build()
-            self.producer.close()
+            
+            # Properly terminate the producer process before closing
+            self.producer.terminate()  # Send termination signal
+            self.producer.join()      # Wait for process to finish
+            self.producer.close()     # Now safe to close
+            
             self.producer = None
             self.batch_queue = None
             self.state_queue = None
