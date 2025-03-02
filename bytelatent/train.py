@@ -64,7 +64,36 @@ from bytelatent.transformer import (
     tp_parallelize,
 )
 
-logger = logging.getLogger()
+def setup_logging():
+    # Configure the root logger to show all levels
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        force=True  # Ensure we override any existing configuration
+    )
+    
+    # Configure all bytelatent loggers
+    bytelatent_logger = logging.getLogger("bytelatent")
+    bytelatent_logger.setLevel(logging.DEBUG)
+    
+    # Create a console handler if none exists
+    if not bytelatent_logger.handlers:
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(formatter)
+        bytelatent_logger.addHandler(console_handler)
+    
+    # Ensure all existing handlers show debug messages
+    for handler in bytelatent_logger.handlers:
+        handler.setLevel(logging.DEBUG)
+
+    # Prevent double logging
+    bytelatent_logger.propagate = False
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 T = TypeVar("T")
 
@@ -265,7 +294,10 @@ def compute_loss(p, y, mask, scale):
 
 def train(args: TrainArgs):
     with ExitStack() as context_stack:
+        setup_logging()
+        
         tokenizer = args.data.tokenizer_args.build()
+        logger.debug("Tokenizer built successfully")
         validate_train_args(
             args,
             tokenizer.n_words,
