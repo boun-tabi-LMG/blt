@@ -39,6 +39,7 @@ data:
   root_dir: /content/blt/data/
   sources:
     dclm_baseline_1.0_10prct_shuffled: 1.0
+  file_format: json
   batch_size: 2
   prefetch_size: 64
   # seqlen is in terms of patches and
