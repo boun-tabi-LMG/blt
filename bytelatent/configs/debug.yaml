@@ -68,18 +68,18 @@ model:
   downsampling_by_pooling: "max"
 
 data:
-  root_dir: ???
+  root_dir: /content/blt/data/
   sources:
-    dclm_baseline_1.0: 1.0
+    dclm_baseline_1.0_10prct_shuffled: 1.0
   batch_size: 2
   prefetch_size: 64
   seq_len: 4096
   load_async: true
-  preprocess_dir: ???
+  preprocess_dir: /content/tmp/preprocess
   tokenizer_args:
     name: blt
     init_kwargs:
-      bpe_tokenizer_path: ???
+      bpe_tokenizer_path: /content/tokenizer/original/tokenizer.model
 
 profiling:
   run: false
