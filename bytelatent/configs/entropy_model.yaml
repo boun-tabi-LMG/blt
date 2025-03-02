@@ -36,9 +36,9 @@ entropy_model:
   attn_impl: "xformers"
 
 data:
-  root_dir: ???
+  root_dir: /content/blt/data/
   sources:
-    dclm_baseline_1.0: 1.0
+    dclm_baseline_1.0_10prct_shuffled: 1.0
   batch_size: 2
   prefetch_size: 64
   # seqlen is in terms of patches and
@@ -47,7 +47,7 @@ data:
   seq_len: 8192
   max_encoder_seq_length: 8192
   load_async: true
-  preprocess_dir: ???
+  preprocess_dir: /content/tmp/preprocess
   # We don't need patches for this model
   add_patches: false
   patcher_args:
