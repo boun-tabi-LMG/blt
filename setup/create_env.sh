@@ -21,20 +21,21 @@ start_time=$(date +%s)
 current_date=$(date +%y%m%d)
 
 # Create environment name with the current date
-env_prefix=blt_$current_date
+# env_prefix=blt_$current_date
+env_prefix=blt_250225
 
 # Create the conda environment
 
-source $CONDA_ROOT/etc/profile.d/conda.sh
+# source $CONDA_ROOT/etc/profile.d/conda.sh
 conda create -n $env_prefix python=3.11 -y -c anaconda
-conda activate $env_prefix
+# conda activate $env_prefix
 
 echo "Currently in env $(which python)"
 
 # Install packages
-pip install torch==2.5.0 xformers --index-url https://download.pytorch.org/whl/cu121
-pip install ninja
-pip install --requirement requirements.txt
+# pip install torch==2.5.0 xformers --index-url https://download.pytorch.org/whl/cu121
+# pip install ninja
+# pip install --requirement requirements.txt
 
 # End timer
 end_time=$(date +%s)
