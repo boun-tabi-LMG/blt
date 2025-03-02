@@ -16,8 +16,40 @@ from bytelatent.data.iterators.abstract_iterator import (
 )
 from bytelatent.data.iterators.packing_iterator import PackingIteratorState
 
-logger = logging.getLogger()
+def setup_logging():
+    # Configure the root logger to show all levels
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        force=True  # Ensure we override any existing configuration
+    )
+    
+    # Configure all bytelatent loggers
+    bytelatent_logger = logging.getLogger("bytelatent")
+    bytelatent_logger.setLevel(logging.DEBUG)
+    
+    # Create a console handler if none exists
+    if not bytelatent_logger.handlers:
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(formatter)
+        bytelatent_logger.addHandler(console_handler)
+    
+    # Ensure all existing handlers show debug messages
+    for handler in bytelatent_logger.handlers:
+        handler.setLevel(logging.DEBUG)
 
+    # Prevent double logging
+    bytelatent_logger.propagate = False
+
+# Set up logger for this module
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Call setup_logging at module level
+setup_logging()
 
 class MultiprocessIteratorState(PydanticIteratorState):
     model_config = ConfigDict(extra="forbid")
@@ -43,7 +75,7 @@ def start_work_from_state(
     state_dumped_event: EventClass,
     state: IteratorState,
 ):
-    logging.info("Worker thread: Starting base_iterator work")
+    logger.info("Worker thread: Starting base_iterator work")
     stateful_iterator = state.build()
     iterator = stateful_iterator.create_iter()
     for item in iterator:
@@ -58,10 +90,10 @@ def start_work_from_state(
         if stop_event.is_set():
             # Signal the end of output, this ensures that even if the queue takes a while to
             # buffer, that the main thread receives everything (and tosses this fake batch)
-            logging.debug(
+            logger.debug(
                 "Worker thread: Stop event detected, outputting is_final=True batch"
             )
-            logging.debug("Worker thread: batch_queue full=%s", batch_queue.full())
+            logger.debug("Worker thread: batch_queue full=%s", batch_queue.full())
             batch_queue.put(
                 Batch(
                     x=np.zeros((1, 1)),
@@ -72,17 +104,17 @@ def start_work_from_state(
                     ngram_ids=None,
                 )
             )
-            logging.debug(
+            logger.debug(
                 "Worker thread: is_final=True batch put in queue, breaking from loop."
             )
             break
 
     try:
-        logging.debug("Worker thread: outputting state")
+        logger.debug("Worker thread: outputting state")
         state_queue.put(stateful_iterator.get_state(), timeout=1)
-        logging.debug("Worker thread: state dump complete")
+        logger.debug("Worker thread: state dump complete")
         state_dumped_event.set()
-        logging.debug("Worker thread: set state_dump_event")
+        logger.debug("Worker thread: set state_dump_event")
     except Full:
         raise ValueError(
             "Attempted to dump state into the state queue, but it was full"
@@ -164,9 +196,9 @@ class MultiprocessIterator(StatefulIterator):
                 serialized_prefetch_buffer=serialized_prefetch_buffer,
             )
         else:
-            logging.debug("Main thread: Sending stop iteration event")
+            logger.debug("Main thread: Sending stop iteration event")
             self.stop_iterating_event.set()
-            logging.debug(
+            logger.debug(
                 "Main thread: Emptying the batch_queue until batch.is_final=True is found."
             )
             self.prefetch_buffer = []
@@ -175,17 +207,17 @@ class MultiprocessIterator(StatefulIterator):
                 try:
                     batch = self.batch_queue.get(timeout=1)
                     if batch.is_final:
-                        logging.debug(
+                        logger.debug(
                             "Main thread: is_final=True batch found, stopping fetch from batch_queue"
                         )
                         final_batch_received = True
                         break
                     self.prefetch_buffer.append(batch)
                 except Empty:
-                    logging.warning("Main thread: batch_queue is abnormally empty")
+                    logger.warning("Main thread: batch_queue is abnormally empty")
             assert final_batch_received
 
-            logging.debug("Main thread: Waiting for state_dumped event")
+            logger.debug("Main thread: Waiting for state_dumped event")
             self.state_dumped_event.wait()
 
             try:
@@ -222,7 +254,7 @@ class MultiprocessIterator(StatefulIterator):
             raise ValueError(
                 "Iterator may be invalid if shutdown was forced before state persisted."
             )
-        logging.info("Main thread: Creating MP iterator")
+        logger.info("Main thread: Creating MP iterator")
         # First yield from the stored prefetch buffer.
         if self.prefetch_buffer is not None:
             while len(self.prefetch_buffer) > 0:
@@ -276,3 +308,6 @@ class MultiprocessIterator(StatefulIterator):
                 raise ValueError(
                     "Attempted to call this iterator after calling get_state(). You must call create_iter() to make a new iterator instead."
                 )
+
+logger.debug("Debug message from multiprocess iterator")
+logger.info("Info message from multiprocess iterator")
