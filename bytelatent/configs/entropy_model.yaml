@@ -19,7 +19,7 @@ distributed:
   model_dtype: bf16
   matmul_allow_tf32: false
   selective_activation_checkpointing: false
-  tp_size: 1
+  tp_size: 2
 
 train_entropy_model: true
 model: null
@@ -36,7 +36,7 @@ entropy_model:
   attn_impl: "xformers"
 
 data:
-  root_dir: /content/blt/data/
+  root_dir: /workspace/blt/data/
   sources:
     dclm_baseline_1.0_10prct_shuffled: 1.0
   file_format: json
@@ -48,7 +48,7 @@ data:
   seq_len: 8192
   max_encoder_seq_length: 8192
   load_async: true
-  preprocess_dir: /content/tmp/preprocess
+  preprocess_dir: /workspace/tmp/preprocess
   # We don't need patches for this model
   add_patches: false
   patcher_args:
