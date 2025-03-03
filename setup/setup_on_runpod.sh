@@ -15,3 +15,5 @@ source blt_env/bin/activate
 pip install torch==2.5.0 xformers --index-url https://download.pytorch.org/whl/cu121
 pip install ninja
 pip install -r blt/requirements.txt
+
+apt install -y zstd
